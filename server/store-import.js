@@ -55,11 +55,13 @@ async function readLimited(response) {
   try { for (;;) { const {value,done}=await reader.read(); if(done) break; size+=value.byteLength; if(size>4*1024*1024){await reader.cancel();throw new ImportError('Магазин віддав надто велику відповідь.',502);} chunks.push(value); } } finally {reader.releaseLock();}
   const bytes=new Uint8Array(size); let offset=0; for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;} return new TextDecoder().decode(bytes);
 }
-export async function importStore(input, fetcher = fetch) {
+const runtimeFetch = (...args) => globalThis.fetch(...args);
+export async function importStore(input, fetcher = runtimeFetch) {
   const source = parseStoreUrl(input);
   const controller = new AbortController(); const timer=setTimeout(()=>controller.abort(),12000);
   try {
-    const response = await fetcher(source.fetchUrl,{redirect:'error',signal:controller.signal,headers:{Accept:source.store==='app-store'?'application/json':'text/html','User-Agent':'Huddlebloom/1.0'}});
+    const response = await fetcher(source.fetchUrl,{redirect:'manual',signal:controller.signal,headers:{Accept:source.store==='app-store'?'application/json':'text/html','User-Agent':'Huddlebloom/1.0'}});
+    if (response.status >= 300 && response.status < 400) throw new ImportError('Магазин перенаправив запит. Використай пряме посилання на сторінку продукту.',502);
     if (!response.ok) throw new ImportError(response.status===404?'Продукт не знайдено. Перевір посилання.':'Магазин тимчасово недоступний. Спробуй пізніше.',response.status===404?404:502);
     const body = await readLimited(response);
     return source.store==='app-store'?normalizeApple(JSON.parse(body),source):normalizeGoogle(body,source);
@@ -68,7 +70,7 @@ export async function importStore(input, fetcher = fetch) {
     throw new ImportError(controller.signal.aborted?'Магазин не відповів вчасно. Спробуй ще раз.':'Не вдалося отримати дані магазину. Можна заповнити профіль вручну.',502);
   } finally {clearTimeout(timer);}
 }
-export async function handleStoreImport(request, fetcher = fetch) {
+export async function handleStoreImport(request, fetcher = runtimeFetch) {
   const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
   if(request.method!=='GET') return new Response(JSON.stringify({error:'Метод не підтримується.'}),{status:405,headers:{...headers,Allow:'GET'}});
   try { const product = await importStore(new URL(request.url).searchParams.get('url'),fetcher);return new Response(JSON.stringify({product}),{headers}); }

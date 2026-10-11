@@ -26,7 +26,7 @@ test('Play reads full description, screens and JSON-LD with quote/order variatio
 });
 test('network requests use canonical destinations and never follow redirects',async()=>{
  const product=await importStore(apple,async(url,options)=>{
-  assert.equal(url,parseStoreUrl(apple).fetchUrl);assert.equal(options.redirect,'error');assert.ok(options.signal);
+  assert.equal(url,parseStoreUrl(apple).fetchUrl);assert.equal(options.redirect,'manual');assert.ok(options.signal);
   return Response.json({results:[{trackId:6783284490,kind:'software',trackName:'Jess'}]});
  });assert.equal(product.name,'Jess');
  let calls=0;await assert.rejects(importStore('https://internal.test',async()=>{calls++;}),/підтримуємо/);assert.equal(calls,0);
@@ -42,4 +42,26 @@ test('API wrapper keeps assets routing and rejects invalid store URLs without as
  let calls=0;const env={ASSETS:{fetch:async()=>{calls++;return new Response('asset');}}};
  const assets=await worker.fetch(new Request('https://example.test/logo.png'),env,{});assert.equal(await assets.text(),'asset');
  const api=await worker.fetch(new Request('https://example.test/api/store-import?url=https://internal.test'),env,{});assert.equal(api.status,400);assert.equal(calls,1);
+});
+
+// Match the edge runtime contract: native fetch needs its global receiver and
+// workerd accepts only follow/manual redirect modes.
+test('default fetch retains the Workers global receiver and uses supported redirect mode',async()=>{
+ const original=globalThis.fetch;
+ globalThis.fetch=async function(url,options){
+  assert.equal(this,globalThis);
+  assert.equal(options.redirect,'manual');
+  return Response.json({results:[{trackId:6783284490,kind:'software',trackName:'Jess'}]});
+ };
+ try{
+  const response=await handleStoreImport(new Request(`https://example.test/api/store-import?url=${encodeURIComponent(apple)}`));
+  assert.equal(response.status,200);assert.equal((await response.json()).product.name,'Jess');
+ }finally{globalThis.fetch=original;}
+});
+test('does not follow a store redirect to any destination',async()=>{
+ let calls=0;
+ const response=await handleStoreImport(new Request(`https://example.test/api/store-import?url=${encodeURIComponent(play)}`),async()=>{
+  calls++;return new Response(null,{status:302,headers:{Location:'http://127.0.0.1/private'}});
+ });
+ assert.equal(response.status,502);assert.equal(calls,1);assert.match((await response.json()).error,/перенаправив/);
 });
