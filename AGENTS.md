@@ -16,3 +16,5 @@ Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts
 - Current positioning: free database of businesses and creators. Do not advertise collaboration yet.
 - Source visual: docs/approved-homepage.webp. Typography and proportions must be compared in browser after changes.
 - Demonstration profiles must remain clearly identified; local drafts are not registrations.
+
+- Refinement: higher-resolution same-style map; generous spacing above/below search; full-width footer divider. Right sidebar is top 5; left catalog displays all filtered results with card/list toggle. Sidebar create-profile CTA has centered text and no arrow.

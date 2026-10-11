@@ -28,3 +28,9 @@ Initial screenshot showed oversized hero and narrow cards. First correction pres
 P3: finalize vector logo masters; tiny photograph variations after cleaning badge overlays. Mobile breakpoint CSS is implemented; dedicated mobile browser viewport verification remains unperformed because this browser interface exposes no viewport setter. Public registration/server and production deployment remain separate launch tasks.
 
 final result: passed
+
+## User-requested refinement — 2026-10-11
+The latest user feedback supersedes the original search spacing and three-row ranking layout. Hero artwork restored using image generation at 1983 × 793 (original crop 795 × 313), saved as map-hd.webp. Lighten blending merges its navy edge with hero background. Added generous CTA-to-search and search-to-filter spacing. Footer divider moved outside the constrained shell.
+Left directory now includes every matching profile, with independent card/list switch and shared filters. Right ranking is capped at five across the complete directory. Six explicitly marked demonstration profiles expose the difference; no real participants were invented. Sidebar CTA has no icon and centered text.
+Browser verified: six card/list results, five ranking items, YouTube filter yields two list results without changing global ranking, zero sidebar CTA SVG icons, no horizontal overflow, full-width footer. New desktop-preview.jpg and list-preview.jpg replace the previous capture; earlier comparison images remain historical evidence of the original implementation.
+Build and catalog tests passed. Native full-page screenshot requests intermittently timed out; final browser captures use the available screenshot output. Dedicated mobile viewport remains unverified.
