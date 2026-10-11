@@ -5,3 +5,9 @@ dist/
 !.env.example
 *.log
 .DS_Store
+public/assets/*-clean.png
+public/assets/maria.webp
+public/assets/forma.webp
+public/assets/danylo.webp
+docs/*.jpg
+docs/*.png
