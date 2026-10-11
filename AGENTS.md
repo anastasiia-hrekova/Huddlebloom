@@ -22,3 +22,5 @@ Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts
 - Rankings: All uses a shared top 5. Creator/business/product tabs each use their own category top 5 and card rank numbering. Search/niche/platform filters do not re-number category rank.
 
 - Hero map is now an animated illustration: SVG signal routes and pulsing beacons over high-resolution source map. Honor prefers-reduced-motion and preserve approved flat-map design.
+
+- Digital-product drafts support importing public App Store/Google Play metadata from a store URL. Review and editing precede saving; keep existing entered name/bio, retain the full description separately, and never mix store ratings with directory view rankings. Import runs on the server and accepts only known store URLs.
