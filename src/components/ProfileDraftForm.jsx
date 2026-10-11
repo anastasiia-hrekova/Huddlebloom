@@ -2,7 +2,38 @@ import {useEffect,useRef,useState} from 'react';
 
 export function ProfileDraftForm({onSaved}) {
  const [form,setForm]=useState({type:'creator',name:'',bio:''});
- con…1126 tokens truncated…430й продукт за посиланням</h3><p>App Store або Google Play — підставимо доступні дані, а ти зможеш їх відредагувати.</p>
+ const [storeUrl,setStoreUrl]=useState(''),[product,setProduct]=useState(null),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
+ const pending=useRef(null);
+ useEffect(()=>()=>pending.current?.abort(),[]);
+ const change=(key,value)=>setForm(previous=>({...previous,[key]:value}));
+ function changeType(type){pending.current?.abort();pending.current=null;setBusy(false);setError('');setMessage('');change('type',type);}
+ function changeUrl(value){pending.current?.abort();pending.current=null;setBusy(false);setError('');setMessage('');setStoreUrl(value);}
+ async function importProduct(){
+  pending.current?.abort();const controller=new AbortController();pending.current=controller;
+  setBusy(true);setError('');setMessage('');
+  try {
+   const response=await fetch(`/api/store-import?url=${encodeURIComponent(storeUrl.trim())}`,{signal:controller.signal,headers:{Accept:'application/json'}});
+   if(!response.headers.get('content-type')?.includes('application/json')) throw new Error('Імпорт недоступний на цьому хостингу. Заповни профіль вручну.');
+   const result=await response.json();if(!response.ok) throw new Error(result.error || 'Не вдалося імпортувати продукт.');
+   if(pending.current!==controller) return;
+   const data=result.product;setProduct(data);
+   setForm(previous=>({...previous,name:previous.name || data.name,bio:previous.bio || data.description.slice(0,500)}));
+   setMessage('Дані імпортовано. Заповнені назва й короткий опис збережені; повний опис та дані магазину показано нижче. Перевір їх перед збереженням.');
+  } catch(error){if(error.name!=='AbortError' && pending.current===controller)setError(error.message);}
+  finally{if(pending.current===controller){pending.current=null;setBusy(false);}}
+ }
+ function save(event){
+  event.preventDefault();setError('');
+  const draft={...form};
+  if(form.type==='product' && product) draft.storeProduct=product;
+  try{localStorage.setItem('huddlebloom.profile-draft.v1',JSON.stringify(draft));onSaved();}
+  catch{setError('Не вдалося зберегти чернетку. Перевір доступ до сховища браузера.');}
+ }
+ return <form className="join-form" onSubmit={save}>
+  <p className="notice">Зараз можна створити локальну чернетку. Вона не потрапить до публічного каталогу.</p>
+  <label>Тип профілю<select name="type" value={form.type} onChange={event=>changeType(event.target.value)}><option value="creator">Креатор</option><option value="business">Бізнес</option><option value="product">Digital-продукт</option></select></label>
+  {form.type==='product'&&<section className="store-import" aria-label="Імпорт із магазину">
+   <h3>Додай продукт за посиланням</h3><p>App Store або Google Play — підставимо доступні дані, а ти зможеш їх відредагувати.</p>
    <label>Посилання на сторінку продукту<input type="url" value={storeUrl} onChange={event=>changeUrl(event.target.value)} placeholder="https://apps.apple.com/ua/app/…" maxLength={2048}/></label>
    <button className="blue" type="button" disabled={busy || !storeUrl.trim()} onClick={importProduct}>{busy?'Завантажуємо дані…':'Імпортувати з магазину'}</button>
    <p className="store-help">Наявні назва й короткий опис не перезаписуються. Повторний імпорт оновить дані магазину. Інші продукти додай вручну.</p>
