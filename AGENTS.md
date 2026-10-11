@@ -18,3 +18,7 @@ Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts
 - Demonstration profiles must remain clearly identified; local drafts are not registrations.
 
 - Refinement: higher-resolution same-style map; generous spacing above/below search; full-width footer divider. Right sidebar is top 5; left catalog displays all filtered results with card/list toggle. Sidebar create-profile CTA has centered text and no arrow.
+
+- Rankings: All uses a shared top 5. Creator/business/product tabs each use their own category top 5 and card rank numbering. Search/niche/platform filters do not re-number category rank.
+
+- Hero map is now an animated illustration: SVG signal routes and pulsing beacons over high-resolution source map. Honor prefers-reduced-motion and preserve approved flat-map design.
