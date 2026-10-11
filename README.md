@@ -15,6 +15,13 @@ npm run build
 
 Production client output: `dist/client`. Static hosting must route navigation requests to `index.html`. The included Worker and `npm run test:sites` support Sites-compatible hosting. No deployment has been performed.
 
+## Cloudflare Workers
+
+Dashboard build command: `npm run build`. Deploy command: `npx wrangler deploy`.
+The checked-in `wrangler.jsonc` serves only `dist/client` with SPA fallback.
+Keep the plain Vite configuration: Wrangler framework auto-setup can add the Cloudflare Vite plugin and change the output to `dist`, breaking the Sites packaging step.
+No Cloudflare Vite plugin is needed for this static frontend. Deploy using the repository configuration instead of auto-generated settings.
+
 ## Current behavior
 
 - Responsive homepage, search, combined category/niche/country/platform filters and view-based sort.
